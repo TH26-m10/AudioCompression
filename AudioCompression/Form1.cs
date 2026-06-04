@@ -24,36 +24,6 @@ namespace AudioCompression
         {
             InitializeComponent();
             settings = new CompressionSettings();
-            InitializeCharts();
-        }
-
-        private void InitializeCharts()
-        {
-            chartPerformance.ChartAreas[0].AxisX.Title = "Time (seconds)";
-            chartPerformance.ChartAreas[0].AxisY.Title = "K samples/sec";
-            chartPerformance.ChartAreas[0].AxisY2.Title = "Compression Ratio (%)";
-            chartPerformance.ChartAreas[0].AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
-            chartPerformance.ChartAreas[0].AxisY.Minimum = 0;
-            chartPerformance.ChartAreas[0].AxisY2.Minimum = 0;
-            chartPerformance.ChartAreas[0].AxisY2.Maximum = 100;
-
-            chartPerformance.Series.Clear();
-
-            var speedSeries = new System.Windows.Forms.DataVisualization.Charting.Series("Speed");
-            speedSeries.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            speedSeries.Color = System.Drawing.Color.DodgerBlue;
-            speedSeries.BorderWidth = 2;
-            speedSeries.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Primary;
-            chartPerformance.Series.Add(speedSeries);
-
-            var ratioSeries = new System.Windows.Forms.DataVisualization.Charting.Series("Ratio");
-            ratioSeries.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            ratioSeries.Color = System.Drawing.Color.OrangeRed;
-            ratioSeries.BorderWidth = 2;
-            ratioSeries.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
-            chartPerformance.Series.Add(ratioSeries);
-
-            chartPerformance.Legends[0].Enabled = true;
         }
 
         private void btnUpload_Click(object sender, EventArgs e)

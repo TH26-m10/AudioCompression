@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -26,44 +27,6 @@ namespace AudioCompression
         {
         }
 
-        /*public override string Compress(string inputFile)
-        {
-            string outputFile = Path.ChangeExtension(inputFile, ".dm");
-
-            AudioPreprocessor processor = new AudioPreprocessor(_settings);
-            ProcessedAudio processed = processor.Process(inputFile);
-            float[] samples = processed.Samples;
-
-            if (samples == null || samples.Length == 0)
-                throw new InvalidOperationException("Preprocessor returned no samples.");
-
-            float rms = (float)Math.Sqrt(samples.Average(s => s * s));
-            float stepSize = Math.Max(1e-6f, Math.Min(rms * 0.5f, 0.5f));
-
-            byte[] encodedData = Encode(samples, stepSize, processed.Channels);
-
-            int bitRate = processed.SampleRate * processed.Channels;
-
-            DMHeader header = new DMHeader
-            {
-                SampleRate = processed.SampleRate,
-                BitDepth = processed.BitDepth,
-                Channels = processed.Channels,
-                BitRate = bitRate,
-                SampleCount = samples.Length,
-                StepSize = stepSize
-            };
-
-            using (var fs = new FileStream(outputFile, FileMode.Create))
-            using (var writer = new BinaryWriter(fs))
-            {
-                WriteHeader(writer, header);
-                writer.Write(encodedData);
-            }
-
-            return outputFile;
-        }*/
-
         public override string Compress(string inputFile)
         {
             string outputFile = Path.ChangeExtension(inputFile, ".dm");
@@ -77,28 +40,8 @@ namespace AudioCompression
             float rms = (float)Math.Sqrt(samples.Average(s => s * s));
             float stepSize = Math.Max(1e-6f, Math.Min(rms * 0.5f, 0.5f));
 
-            // predicted state lives here — captured by the lambda
-            float[] predicted = new float[processed.Channels];
-
-            // Pass only the per-sample logic — loop runs in base class
-            byte[] encodedData = RunEncodeLoop(samples, processed.Channels,
-                (sample, channel) =>
-                {
-                    bool bit;
-                    if (sample >= predicted[channel])
-                    {
-                        bit = true;
-                        predicted[channel] += stepSize;
-                    }
-                    else
-                    {
-                        bit = false;
-                        predicted[channel] -= stepSize;
-                    }
-
-                    predicted[channel] = Math.Max(-1f, Math.Min(1f, predicted[channel]));
-                    return bit;
-                });
+            long originalSize = new FileInfo(inputFile).Length;
+            byte[] encodedData = Encode(samples, stepSize, processed.Channels, originalSize);
 
             int bitRate = processed.SampleRate * processed.Channels;
 
@@ -121,43 +64,6 @@ namespace AudioCompression
 
             return outputFile;
         }
-        /*public override string Compress(string inputFile)
-        {
-            string outputFile = Path.ChangeExtension(inputFile, ".dm");
-
-            AudioPreprocessor processor = new AudioPreprocessor(_settings);
-            ProcessedAudio processed = processor.Process(inputFile);
-            float[] samples = processed.Samples;
-
-            if (samples == null || samples.Length == 0)
-                throw new InvalidOperationException("Preprocessor returned no samples. Check the input file.");
-
-            float rms = (float)Math.Sqrt(samples.Average(s => s * s));
-            float stepSize = Math.Max(1e-6f, Math.Min(rms * 0.5f, 0.5f));
-
-            byte[] encodedData = Encode(samples, stepSize, processed.Channels);
-
-            int bitRate = processed.SampleRate * processed.Channels;
-
-            DMHeader header = new DMHeader
-            {
-                SampleRate = processed.SampleRate,
-                BitDepth = processed.BitDepth,
-                Channels = processed.Channels,
-                BitRate = bitRate,
-                SampleCount = samples.Length,
-                StepSize = stepSize
-            };
-
-            using (var fs = new FileStream(outputFile, FileMode.Create))
-            using (var writer = new BinaryWriter(fs))
-            {
-                WriteHeader(writer, header);
-                writer.Write(encodedData);
-            }
-
-            return outputFile;
-        }*/
 
         public override string Decompress(string dmFile)
         {
@@ -188,7 +94,7 @@ namespace AudioCompression
             return outputFile;
         }
 
-        private byte[] Encode(float[] samples, float stepSize, int channels)
+        private byte[] Encode(float[] samples, float stepSize, int channels, long originalFileSizeBytes)
         {
             int sampleCount = samples.Length;
             int byteCount = (sampleCount + 7) / 8;
@@ -234,7 +140,10 @@ namespace AudioCompression
                     float percentage = (float)(i + 1) / sampleCount;
                     long elapsedMs = stopwatch.ElapsedMilliseconds;
                     float speed = elapsedMs > 0 ? (i + 1) / (elapsedMs / 1000f) : 0f;
-                    float ratio = 1f / 32f;
+                    float bytesProduced = (i + 1) / 8f;
+                    float ratio = originalFileSizeBytes > 0
+                        ? bytesProduced / originalFileSizeBytes
+                        : 0f;
 
                     ReportProgress(new CompressionProgress
                     {

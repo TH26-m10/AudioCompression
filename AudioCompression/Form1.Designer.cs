@@ -32,11 +32,13 @@ namespace AudioCompression
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.btnStop = new System.Windows.Forms.Button();
             this.btnPause = new System.Windows.Forms.Button();
             this.btnPlay = new System.Windows.Forms.Button();
             this.btnUpload = new System.Windows.Forms.Button();
             this.panelDropZone = new System.Windows.Forms.Panel();
+            this.plotAudio = new OxyPlot.WindowsForms.PlotView();
             this.lblMessage = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -65,7 +67,6 @@ namespace AudioCompression
             this.chartPerformance = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.lblProgress = new System.Windows.Forms.Label();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.plotAudio = new OxyPlot.WindowsForms.PlotView();
             this.panelDropZone.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartPerformance)).BeginInit();
@@ -130,6 +131,18 @@ namespace AudioCompression
             this.panelDropZone.TabIndex = 4;
             this.panelDropZone.DragDrop += new System.Windows.Forms.DragEventHandler(this.panelDropZone_DragDrop);
             this.panelDropZone.DragEnter += new System.Windows.Forms.DragEventHandler(this.panelDropZone_DragEnter);
+            // 
+            // plotAudio
+            // 
+            this.plotAudio.Location = new System.Drawing.Point(11, 3);
+            this.plotAudio.Name = "plotAudio";
+            this.plotAudio.PanCursor = System.Windows.Forms.Cursors.Hand;
+            this.plotAudio.Size = new System.Drawing.Size(824, 101);
+            this.plotAudio.TabIndex = 18;
+            this.plotAudio.Text = "plotView1";
+            this.plotAudio.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
+            this.plotAudio.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
+            this.plotAudio.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
             // 
             // lblMessage
             // 
@@ -414,16 +427,33 @@ namespace AudioCompression
             // 
             // chartPerformance
             // 
+            chartArea1.AxisX.Title = "Time (seconds)";
+            chartArea1.AxisY.Title = "K samples/sec";
+            chartArea1.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
+            chartArea1.AxisY2.Maximum = 100D;
+            chartArea1.AxisY2.Minimum = 0D;
+            chartArea1.AxisY2.Title = "Compression Ratio (%)";
             chartArea1.Name = "ChartArea1";
             this.chartPerformance.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.chartPerformance.Legends.Add(legend1);
             this.chartPerformance.Location = new System.Drawing.Point(15, 524);
             this.chartPerformance.Name = "chartPerformance";
+            series1.BorderWidth = 2;
             series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             series1.Legend = "Legend1";
-            series1.Name = "Series1";
+            series1.Name = "Speed";
+            series2.BorderWidth = 2;
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
+            series2.Legend = "Legend1";
+            series2.Name = "Ratio";
+            series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
             this.chartPerformance.Series.Add(series1);
+            this.chartPerformance.Series.Add(series2);
             this.chartPerformance.Size = new System.Drawing.Size(833, 161);
             this.chartPerformance.TabIndex = 15;
             this.chartPerformance.Text = "chart1";
@@ -447,18 +477,6 @@ namespace AudioCompression
             this.btnCancel.Text = "Cancel Compression";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-            // 
-            // plotAudio
-            // 
-            this.plotAudio.Location = new System.Drawing.Point(11, 3);
-            this.plotAudio.Name = "plotAudio";
-            this.plotAudio.PanCursor = System.Windows.Forms.Cursors.Hand;
-            this.plotAudio.Size = new System.Drawing.Size(824, 101);
-            this.plotAudio.TabIndex = 18;
-            this.plotAudio.Text = "plotView1";
-            this.plotAudio.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
-            this.plotAudio.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
-            this.plotAudio.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
             // 
             // Form1
             // 
