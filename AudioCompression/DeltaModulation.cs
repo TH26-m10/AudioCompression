@@ -15,10 +15,12 @@ namespace AudioCompression
             public int BitDepth { get; set; }
             public int Channels { get; set; }
             public int BitRate { get; set; }
-            
+
             // DM specific
             public int SampleCount { get; set; }
             public float StepSize { get; set; }
+            public string OriginalFormat { get; set; }
+            public int OriginalBitRate { get; set; }  // Store original bitrate
         }
 
         private static readonly byte[] MagicBytes = new byte[] { 0x44, 0x4D }; // "DM"
@@ -44,6 +46,7 @@ namespace AudioCompression
             byte[] encodedData = Encode(samples, stepSize, processed.Channels, originalSize);
 
             int bitRate = processed.SampleRate * processed.Channels;
+            int originalBitRate = GetFileBitRate(inputFile);
 
             DMHeader header = new DMHeader
             {
@@ -52,7 +55,9 @@ namespace AudioCompression
                 Channels = processed.Channels,
                 BitRate = bitRate,
                 SampleCount = samples.Length,
-                StepSize = stepSize
+                StepSize = stepSize,
+                OriginalFormat = Path.GetExtension(inputFile).ToLowerInvariant(),
+                OriginalBitRate = originalBitRate
             };
 
             using (var fs = new FileStream(outputFile, FileMode.Create))
@@ -70,10 +75,6 @@ namespace AudioCompression
             if (!File.Exists(dmFile))
                 throw new FileNotFoundException($"DM file not found: {dmFile}");
 
-            string outputFile = Path.Combine(
-                Path.GetDirectoryName(dmFile),
-                Path.GetFileNameWithoutExtension(dmFile) + "_decoded.wav");
-
             DMHeader header;
             byte[] encodedData;
             using (var fs = new FileStream(dmFile, FileMode.Open))
@@ -87,11 +88,53 @@ namespace AudioCompression
 
                 encodedData = reader.ReadBytes((int)remaining);
             }
+
             float[] samples = Decode(encodedData, header.SampleCount, header.StepSize, header.Channels);
 
-            WriteWavFile(outputFile, samples, header.SampleRate, header.Channels, header.BitDepth);
+            // Always decode to WAV first with ORIGINAL bit depth
+            string tempWav = Path.Combine(
+                Path.GetDirectoryName(dmFile),
+                Path.GetFileNameWithoutExtension(dmFile) + "_decoded.wav");
 
-            return outputFile;
+            WriteWavFile(tempWav, samples, header.SampleRate, header.Channels, header.BitDepth);
+
+            // Then convert to original format if needed
+            string originalFormat = header.OriginalFormat ?? ".wav";
+            string finalOutput = ConvertFromWav(tempWav, originalFormat, header.BitDepth, header.OriginalBitRate);
+
+            // Clean up temp WAV if we converted to something else
+            if (!finalOutput.Equals(tempWav, StringComparison.OrdinalIgnoreCase) && File.Exists(tempWav))
+                File.Delete(tempWav);
+
+            return finalOutput;
+        }
+
+        private int GetFileBitRate(string inputFile)
+        {
+            try
+            {
+                using (var reader = new AudioFileReader(inputFile))
+                {
+                    var fileInfo = new FileInfo(inputFile);
+                    long fileSizeBytes = fileInfo.Length;
+                    double durationSeconds = reader.TotalTime.TotalSeconds;
+
+                    if (durationSeconds > 0)
+                    {
+                        int bitRateKbps = (int)(fileSizeBytes * 8 / durationSeconds / 1000);
+
+                        // Round to nearest common bitrate (8 kbps increments)
+                        bitRateKbps = (bitRateKbps / 8) * 8;
+
+                        return bitRateKbps > 0 ? bitRateKbps : 128;
+                    }
+                    return 128;
+                }
+            }
+            catch
+            {
+                return 128;
+            }
         }
 
         private byte[] Encode(float[] samples, float stepSize, int channels, long originalFileSizeBytes)
@@ -106,8 +149,6 @@ namespace AudioCompression
 
             for (int i = 0; i < sampleCount; i++)
             {
-                // Check for cancellation every reportInterval samples
-                // same frequency as progress reporting — no extra overhead
                 if (i % reportInterval == 0)
                     CancellationToken.ThrowIfCancellationRequested();
 
@@ -157,7 +198,7 @@ namespace AudioCompression
 
             return encoded;
         }
-        
+
         private float[] Decode(byte[] encodedData, int sampleCount, float stepSize, int channels)
         {
             float[] samples = new float[sampleCount];
@@ -194,6 +235,11 @@ namespace AudioCompression
             writer.Write(header.BitRate);
             writer.Write(header.SampleCount);
             writer.Write(header.StepSize);
+            writer.Write(header.OriginalBitRate);
+
+            // Write format as fixed-length string (max 20 chars)
+            string format = (header.OriginalFormat ?? ".wav").PadRight(20).Substring(0, 20);
+            writer.Write(format.ToCharArray());
         }
 
         private DMHeader ReadHeader(BinaryReader reader)
@@ -202,15 +248,19 @@ namespace AudioCompression
             if (magic[0] != MagicBytes[0] || magic[1] != MagicBytes[1])
                 throw new InvalidDataException("Not a valid DM file — magic bytes mismatch.");
 
-            return new DMHeader
+            var header = new DMHeader
             {
                 SampleRate = reader.ReadInt32(),
                 BitDepth = reader.ReadInt32(),
                 Channels = reader.ReadInt32(),
                 BitRate = reader.ReadInt32(),
                 SampleCount = reader.ReadInt32(),
-                StepSize = reader.ReadSingle()
+                StepSize = reader.ReadSingle(),
+                OriginalBitRate = reader.ReadInt32(),
+                OriginalFormat = new string(reader.ReadChars(20)).Trim()
             };
+
+            return header;
         }
     }
 }

@@ -112,16 +112,37 @@ namespace AudioCompression
 
         private void DisplayAudioInfo(string filePath)
         {
-            var file = TagLib.File.Create(filePath);
-            FileInfo fileInfo = new FileInfo(filePath);
+            try
+            {
+                FileInfo fileInfo = new FileInfo(filePath);
 
-            lblFileSize.Text = (fileInfo.Length / 1024.0 / 1024.0).ToString("0.00") + " MB";
-            lblFileType.Text = fileInfo.Extension.ToUpper();
-            lblDuration.Text = file.Properties.Duration.ToString(@"hh\:mm\:ss");
-            lblBitRate.Text = file.Properties.AudioBitrate + " kbps";
-            lblSampleRate.Text = (file.Properties.AudioSampleRate / 1000) + " KHz";
-            lblChannels.Text = file.Properties.AudioChannels.ToString();
-            lblEncoding.Text = file.Properties.Description;
+                // Always use AudioFileReader for duration - it's more reliable
+                using (var reader = new AudioFileReader(filePath))
+                {
+                    lblFileSize.Text = (fileInfo.Length / 1024.0 / 1024.0).ToString("0.00") + " MB";
+                    lblFileType.Text = fileInfo.Extension.ToUpper();
+                    lblDuration.Text = reader.TotalTime.ToString(@"hh\:mm\:ss");
+                    lblSampleRate.Text = (reader.WaveFormat.SampleRate / 1000) + " KHz";
+                    lblChannels.Text = reader.WaveFormat.Channels.ToString();
+                }
+
+                // Get bitrate from TagLib if possible
+                try
+                {
+                    var file = TagLib.File.Create(filePath);
+                    lblBitRate.Text = file.Properties.AudioBitrate + " kbps";
+                    lblEncoding.Text = file.Properties.Description;
+                }
+                catch
+                {
+                    lblBitRate.Text = "N/A";
+                    lblEncoding.Text = "Audio";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading audio info:\n" + ex.Message);
+            }
         }
 
         private void PlotWaveform(string filePath)
@@ -525,6 +546,27 @@ namespace AudioCompression
             btnShowReport.Enabled = false;
             reportText = null;
             MessageBox.Show("Reset to original file.");
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            outputDevice?.Stop();
+            outputDevice?.Dispose();
+            audioFile?.Dispose();
+
+            // Clean up temp compressed file
+            if (!string.IsNullOrEmpty(compressedFilePath) && File.Exists(compressedFilePath))
+            {
+                try { File.Delete(compressedFilePath); } catch { }
+            }
+
+            if (!string.IsNullOrEmpty(decompressedFilePath) && File.Exists(decompressedFilePath))
+            {
+                try { File.Delete(decompressedFilePath); } catch { }
+                decompressedFilePath = null;
+            }
+
+            base.OnFormClosing(e);
         }
 
     }

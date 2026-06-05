@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using NAudio.Flac;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
@@ -107,14 +108,23 @@ namespace AudioCompression
             switch (ext)
             {
                 case ".wav":
-                case ".aiff":
-                case ".aif":
                     using (var inspector = new WaveFileReader(filePath))
                         return inspector.WaveFormat.BitsPerSample;
+
+                case ".aif":
+                case ".aiff":
+                    using (var inspector = new AiffFileReader(filePath))
+                        return inspector.WaveFormat.BitsPerSample;
+
+                /*case ".flac":
+                    using (var inspector = new FlacReader(filePath))
+                        return inspector.WaveFormat.BitsPerSample;*/
 
                 case ".mp3":
                 case ".aac":
                 case ".m4a":
+                case ".wma":
+                case ".ogg":
                     return 16;
 
                 default:
