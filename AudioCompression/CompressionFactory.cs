@@ -15,7 +15,7 @@ namespace AudioCompression
                     throw new NotImplementedException("DPCM not implemented yet.");
 
                 case CompressionAlgorithm.AdaptiveDeltaModulation:
-                    throw new NotImplementedException("Adaptive Delta Modulation not implemented yet.");
+                    return new AdaptiveDeltaModulation(settings);
 
                 case CompressionAlgorithm.PredictiveDifferentialCoding:
                     throw new NotImplementedException("Predictive Differential Coding not implemented yet.");

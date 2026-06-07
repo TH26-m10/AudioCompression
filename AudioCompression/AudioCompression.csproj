@@ -116,6 +116,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdaptiveDeltaModulation.cs" />
     <Compile Include="AudioPreprocessor.cs" />
     <Compile Include="CompressionAlgorithmBase.cs" />
     <Compile Include="CompressionFactory.cs" />

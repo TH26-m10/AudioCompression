@@ -43,11 +43,11 @@ namespace AudioCompression
         // Delta Modulation
         public float FixedStepSize { get; set; } = 0.01f;
 
-        // Adaptive Delta Modulation (CVSD)
-        /*public int BitHistoryLength { get; set; } = 3;
+        //Adaptive Delta Modulation (CVSD)
+        public int BitHistoryLength { get; set; } = 3;
         public float MinStepSize { get; set; } = 0.001f;
         public float MaxStepSize { get; set; } = 0.5f;
         public float StepMultiplier { get; set; } = 1.5f;
-        public float StepDecay { get; set; } = 0.5f;*/
+        public float StepDecay { get; set; } = 0.5f;
     }
 }

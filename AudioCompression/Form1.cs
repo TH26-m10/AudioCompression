@@ -494,15 +494,22 @@ namespace AudioCompression
             int reportChannels = 0;
             int reportBitRate = 0;
             float reportStepSize = 0f; // for DM
-            // بينضاف هون متغيرات حسب كل خوارزمية
+
+            // ========== جديد: متغيرات ADM ==========
+            float reportInitialStepSize = 0f;
+            float reportMinStepSize = 0f;
+            float reportMaxStepSize = 0f;
+            float reportStepMultiplier = 0f;
+            float reportStepDecay = 0f;
+            int reportBitHistoryLength = 0;
 
             try
             {
                 using (var fs = new FileStream(compressedFilePath, FileMode.Open))
                 using (var reader = new BinaryReader(fs))
                 {
-                    // حقول عامةموجودة بكل هيدر لخوارزمية
-                    reader.ReadBytes(2);       
+                    // حقول عامة موجودة بكل هيدر لخوارزمية
+                    reader.ReadBytes(2);
                     reportSampleRate = reader.ReadInt32();
                     reportBitDepth = reader.ReadInt32();
                     reportChannels = reader.ReadInt32();
@@ -512,11 +519,20 @@ namespace AudioCompression
                     switch (settings.Algorithm)
                     {
                         case CompressionAlgorithm.DeltaModulation:
-                            reader.ReadInt32();
+                            reader.ReadInt32(); // SampleCount
                             reportStepSize = reader.ReadSingle();
                             break;
 
-                            // هون بينضافو باقي الخوارزميات
+                        // ========== جديد: ADM ==========
+                        case CompressionAlgorithm.AdaptiveDeltaModulation:
+                            reader.ReadInt32(); // SampleCount
+                            reportInitialStepSize = reader.ReadSingle();
+                            reportMinStepSize = reader.ReadSingle();
+                            reportMaxStepSize = reader.ReadSingle();
+                            reportStepMultiplier = reader.ReadSingle();
+                            reportStepDecay = reader.ReadSingle();
+                            reportBitHistoryLength = reader.ReadInt32();
+                            break;
                     }
                 }
             }
@@ -530,7 +546,7 @@ namespace AudioCompression
                 $"Compression Time: {elapsedMs} ms\n\n" +
                 $"Algorithm: {settings.Algorithm}\n" +
                 $"Sample Rate: {reportSampleRate} Hz\n" +
-                $"Encoded Bit Rate: {reportBitRate/1000} kbps\n" +
+                $"Encoded Bit Rate: {reportBitRate / 1000} kbps\n" +
                 $"Bit Depth: {reportBitDepth}\n" +
                 $"Channels: {reportChannels}\n";
 
@@ -546,11 +562,18 @@ namespace AudioCompression
                 case CompressionAlgorithm.NonlinearQuantization:
                     break;
 
+                
                 case CompressionAlgorithm.AdaptiveDeltaModulation:
+                    reportText += $"CVSD Parameters:\n";
+                    reportText += $"  Initial Step Size: {reportInitialStepSize}\n";
+                    reportText += $"  Min Step Size: {reportMinStepSize}\n";
+                    reportText += $"  Max Step Size: {reportMaxStepSize}\n";
+                    reportText += $"  Step Multiplier: {reportStepMultiplier}\n";
+                    reportText += $"  Step Decay: {reportStepDecay}\n";
+                    reportText += $"  Bit History Length: {reportBitHistoryLength}\n";
                     break;
             }
         }
-
         private void btnShowReport_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(reportText))
