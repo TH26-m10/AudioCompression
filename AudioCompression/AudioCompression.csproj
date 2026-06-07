@@ -118,6 +118,7 @@
   <ItemGroup>
     <Compile Include="AdaptiveDeltaModulation.cs" />
     <Compile Include="AudioPreprocessor.cs" />
+    <Compile Include="DPCM.cs" />
     <Compile Include="CompressionAlgorithmBase.cs" />
     <Compile Include="CompressionFactory.cs" />
     <Compile Include="CompressionProgress.cs" />

@@ -35,7 +35,8 @@ namespace AudioCompression
         // public CompandingLaw CompandingLaw { get; set; } = CompandingLaw.MuLaw;
 
         // DPCM
-        // public int PredictorOrder { get; set; } = 1;
+        public int? QuantizationLevels { get; set; } = 16;
+
 
         // ADPCM
         //public double AdaptationSpeed { get; set; } = 0.5;

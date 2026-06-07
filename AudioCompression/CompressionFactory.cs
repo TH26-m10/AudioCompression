@@ -12,7 +12,7 @@ namespace AudioCompression
                     return new DeltaModulation(settings);
 
                 case CompressionAlgorithm.DPCM:
-                    throw new NotImplementedException("DPCM not implemented yet.");
+                    return new DPCM(settings);
 
                 case CompressionAlgorithm.AdaptiveDeltaModulation:
                     return new AdaptiveDeltaModulation(settings);

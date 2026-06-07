@@ -34,6 +34,9 @@
             this.cmbAlgorithm = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.panelSpecific = new System.Windows.Forms.Panel();
+            this.panelDPCM = new System.Windows.Forms.Panel();  // ← جديد!
+            this.cmbQuantizationLevels = new System.Windows.Forms.ComboBox();  // ← جديد!
+            this.label11 = new System.Windows.Forms.Label();  // ← جديد!
             this.panelADM = new System.Windows.Forms.Panel();
             this.numDecay = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
@@ -59,6 +62,7 @@
             this.groupBoxGlobal.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numTargetBitRate)).BeginInit();
             this.panelSpecific.SuspendLayout();
+            this.panelDPCM.SuspendLayout();  // ← جديد!
             this.panelADM.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDecay)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMultiplier)).BeginInit();
@@ -155,12 +159,50 @@
             // panelSpecific
             // 
             this.panelSpecific.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelSpecific.Controls.Add(this.panelDPCM);  // ← جديد! (لازم يكون أول وحدة)
             this.panelSpecific.Controls.Add(this.panelADM);
             this.panelSpecific.Controls.Add(this.panelDM);
             this.panelSpecific.Location = new System.Drawing.Point(0, 167);
             this.panelSpecific.Name = "panelSpecific";
             this.panelSpecific.Size = new System.Drawing.Size(360, 150);
             this.panelSpecific.TabIndex = 1;
+            // 
+            // panelDPCM  // ← جديد! كامل
+            // 
+            this.panelDPCM.Controls.Add(this.cmbQuantizationLevels);
+            this.panelDPCM.Controls.Add(this.label11);
+            this.panelDPCM.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelDPCM.Location = new System.Drawing.Point(0, 0);
+            this.panelDPCM.Name = "panelDPCM";
+            this.panelDPCM.Size = new System.Drawing.Size(358, 148);
+            this.panelDPCM.TabIndex = 2;
+            this.panelDPCM.Visible = false;
+            // 
+            // cmbQuantizationLevels
+            // 
+            this.cmbQuantizationLevels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbQuantizationLevels.FormattingEnabled = true;
+            this.cmbQuantizationLevels.Items.AddRange(new object[] {
+            "4",
+            "8",
+            "16",
+            "32",
+            "64",
+            "128",
+            "256"});
+            this.cmbQuantizationLevels.Location = new System.Drawing.Point(150, 25);
+            this.cmbQuantizationLevels.Name = "cmbQuantizationLevels";
+            this.cmbQuantizationLevels.Size = new System.Drawing.Size(120, 24);
+            this.cmbQuantizationLevels.TabIndex = 1;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(6, 28);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(138, 17);
+            this.label11.TabIndex = 0;
+            this.label11.Text = "Quantization Levels:";
             // 
             // panelADM
             // 
@@ -518,6 +560,8 @@
             this.groupBoxGlobal.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numTargetBitRate)).EndInit();
             this.panelSpecific.ResumeLayout(false);
+            this.panelDPCM.ResumeLayout(false);  // ← جديد!
+            this.panelDPCM.PerformLayout();  // ← جديد!
             this.panelADM.ResumeLayout(false);
             this.panelADM.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDecay)).EndInit();
@@ -563,5 +607,10 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.NumericUpDown numDecay;
         private System.Windows.Forms.Label label10;
+
+
+        private System.Windows.Forms.Panel panelDPCM;
+        private System.Windows.Forms.ComboBox cmbQuantizationLevels;
+        private System.Windows.Forms.Label label11;
     }
 }

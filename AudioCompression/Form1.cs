@@ -248,6 +248,7 @@ namespace AudioCompression
                 if (settingsForm.ShowDialog() == DialogResult.OK)
                 {
                     settings = settingsForm.Settings;
+                    
                 }
             }
         }
@@ -493,15 +494,17 @@ namespace AudioCompression
             int reportBitDepth = 0;
             int reportChannels = 0;
             int reportBitRate = 0;
-            float reportStepSize = 0f; // for DM
+            float reportStepSize = 0f; // DM
 
-            // ========== جديد: متغيرات ADM ==========
+            //   ADM
             float reportInitialStepSize = 0f;
             float reportMinStepSize = 0f;
             float reportMaxStepSize = 0f;
             float reportStepMultiplier = 0f;
             float reportStepDecay = 0f;
             int reportBitHistoryLength = 0;
+            // DPCM
+            int reportQuantizationLevels = 0;
 
             try
             {
@@ -533,6 +536,13 @@ namespace AudioCompression
                             reportStepDecay = reader.ReadSingle();
                             reportBitHistoryLength = reader.ReadInt32();
                             break;
+
+                        case CompressionAlgorithm.DPCM:
+                            reader.ReadInt32(); // SampleCount
+                            reportQuantizationLevels = reader.ReadInt32();
+
+
+                            break;
                     }
                 }
             }
@@ -557,6 +567,7 @@ namespace AudioCompression
                     break;
 
                 case CompressionAlgorithm.DPCM:
+                    reportText += $"Quantization Levels: {reportQuantizationLevels}\n";
                     break;
 
                 case CompressionAlgorithm.NonlinearQuantization:

@@ -55,12 +55,18 @@ namespace AudioCompression
             // ========== Delta Modulation ==========
             numFixedStepSize.Value = (decimal)Settings.FixedStepSize;
 
-            // ========== Adaptive Delta Modulation (CVSD) - جديد! ==========
+            // ========== Adaptive Delta Modulation (CVSD) ==========
             numBitHistory.Value = Settings.BitHistoryLength;
             numMinStep.Value = (decimal)Settings.MinStepSize;
             numMaxStep.Value = (decimal)Settings.MaxStepSize;
             numMultiplier.Value = (decimal)Settings.StepMultiplier;
             numDecay.Value = (decimal)Settings.StepDecay;
+
+            // DPCM 
+            if (Settings.QuantizationLevels.HasValue)
+                cmbQuantizationLevels.SelectedItem = Settings.QuantizationLevels.Value.ToString();
+            else
+                cmbQuantizationLevels.SelectedItem = "16";
 
             UpdatePanelVisibility();
         }
@@ -79,7 +85,8 @@ namespace AudioCompression
         {
             // نخفي كل البانلات أولاً
             panelDM.Visible = false;
-            panelADM.Visible = false;  // ← جديد!
+            panelADM.Visible = false;
+            panelDPCM.Visible = false;  // ← جديد!
 
             if (cmbAlgorithm.SelectedItem == null) return;
 
@@ -92,7 +99,11 @@ namespace AudioCompression
                     break;
 
                 case "AdaptiveDeltaModulation":
-                    panelADM.Visible = true;  // ← جديد!
+                    panelADM.Visible = true;
+                    break;
+
+                case "DPCM":  // ← جديد!
+                    panelDPCM.Visible = true;
                     break;
             }
         }
@@ -132,12 +143,15 @@ namespace AudioCompression
             // ========== Delta Modulation ==========
             Settings.FixedStepSize = (float)numFixedStepSize.Value;
 
-            // ========== Adaptive Delta Modulation (CVSD) - جديد! ==========
+            // ========== Adaptive Delta Modulation (CVSD) ==========
             Settings.BitHistoryLength = (int)numBitHistory.Value;
             Settings.MinStepSize = (float)numMinStep.Value;
             Settings.MaxStepSize = (float)numMaxStep.Value;
             Settings.StepMultiplier = (float)numMultiplier.Value;
             Settings.StepDecay = (float)numDecay.Value;
+
+     
+            Settings.QuantizationLevels = int.Parse(cmbQuantizationLevels.SelectedItem.ToString());
 
             DialogResult = DialogResult.OK;
             Close();
