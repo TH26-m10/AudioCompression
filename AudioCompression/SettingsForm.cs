@@ -17,7 +17,6 @@ namespace AudioCompression
 
         private void LoadSettings()
         {
-            // ========== إعدادات عامة ==========
 
             // Sample Rate
             if (Settings.SampleRate.HasValue)
@@ -52,10 +51,10 @@ namespace AudioCompression
             // Algorithm
             cmbAlgorithm.SelectedItem = Settings.Algorithm.ToString();
 
-            // ========== Delta Modulation ==========
+            //Delta Modulation
             numFixedStepSize.Value = (decimal)Settings.FixedStepSize;
 
-            // ========== Adaptive Delta Modulation (CVSD) ==========
+            // Adaptive Delta Modulation 
             numBitHistory.Value = Settings.BitHistoryLength;
             numMinStep.Value = (decimal)Settings.MinStepSize;
             numMaxStep.Value = (decimal)Settings.MaxStepSize;
@@ -83,10 +82,10 @@ namespace AudioCompression
 
         private void UpdatePanelVisibility()
         {
-            // نخفي كل البانلات أولاً
+           
             panelDM.Visible = false;
             panelADM.Visible = false;
-            panelDPCM.Visible = false;  // ← جديد!
+            panelDPCM.Visible = false; 
 
             if (cmbAlgorithm.SelectedItem == null) return;
 
@@ -102,7 +101,7 @@ namespace AudioCompression
                     panelADM.Visible = true;
                     break;
 
-                case "DPCM":  // ← جديد!
+                case "DPCM":  
                     panelDPCM.Visible = true;
                     break;
             }
@@ -110,7 +109,7 @@ namespace AudioCompression
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            // ========== إعدادات عامة ==========
+         
 
             // Sample Rate
             if (cmbSampleRate.SelectedItem.ToString() == original)
@@ -140,17 +139,17 @@ namespace AudioCompression
             Settings.Algorithm = (CompressionAlgorithm)Enum.Parse(
                 typeof(CompressionAlgorithm), cmbAlgorithm.SelectedItem.ToString());
 
-            // ========== Delta Modulation ==========
+            //  Delta Modulation 
             Settings.FixedStepSize = (float)numFixedStepSize.Value;
 
-            // ========== Adaptive Delta Modulation (CVSD) ==========
+            //  Adaptive Delta Modulation 
             Settings.BitHistoryLength = (int)numBitHistory.Value;
             Settings.MinStepSize = (float)numMinStep.Value;
             Settings.MaxStepSize = (float)numMaxStep.Value;
             Settings.StepMultiplier = (float)numMultiplier.Value;
             Settings.StepDecay = (float)numDecay.Value;
 
-     
+            //DPCM
             Settings.QuantizationLevels = int.Parse(cmbQuantizationLevels.SelectedItem.ToString());
 
             DialogResult = DialogResult.OK;

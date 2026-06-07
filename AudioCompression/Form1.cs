@@ -496,13 +496,14 @@ namespace AudioCompression
             int reportBitRate = 0;
             float reportStepSize = 0f; // DM
 
-            //   ADM
+            // ADM
             float reportInitialStepSize = 0f;
             float reportMinStepSize = 0f;
             float reportMaxStepSize = 0f;
             float reportStepMultiplier = 0f;
             float reportStepDecay = 0f;
             int reportBitHistoryLength = 0;
+
             // DPCM
             int reportQuantizationLevels = 0;
 
@@ -511,14 +512,14 @@ namespace AudioCompression
                 using (var fs = new FileStream(compressedFilePath, FileMode.Open))
                 using (var reader = new BinaryReader(fs))
                 {
-                    // حقول عامة موجودة بكل هيدر لخوارزمية
+                
                     reader.ReadBytes(2);
+
+             
                     reportSampleRate = reader.ReadInt32();
                     reportBitDepth = reader.ReadInt32();
                     reportChannels = reader.ReadInt32();
-                    reportBitRate = reader.ReadInt32();
 
-                    // حقول الخاصة بكل خوارزمية
                     switch (settings.Algorithm)
                     {
                         case CompressionAlgorithm.DeltaModulation:
@@ -526,7 +527,6 @@ namespace AudioCompression
                             reportStepSize = reader.ReadSingle();
                             break;
 
-                        // ========== جديد: ADM ==========
                         case CompressionAlgorithm.AdaptiveDeltaModulation:
                             reader.ReadInt32(); // SampleCount
                             reportInitialStepSize = reader.ReadSingle();
@@ -538,10 +538,14 @@ namespace AudioCompression
                             break;
 
                         case CompressionAlgorithm.DPCM:
-                            reader.ReadInt32(); // SampleCount
+                        
+                            reader.ReadInt32();                          
                             reportQuantizationLevels = reader.ReadInt32();
-
-
+                            reader.ReadSingle();                       
+                            reader.ReadSingle();                         
+                            reader.ReadSingle();                         
+                            reader.ReadString();                       
+                            reportBitRate = reader.ReadInt32();          
                             break;
                     }
                 }
@@ -572,8 +576,6 @@ namespace AudioCompression
 
                 case CompressionAlgorithm.NonlinearQuantization:
                     break;
-
-                
                 case CompressionAlgorithm.AdaptiveDeltaModulation:
                     reportText += $"CVSD Parameters:\n";
                     reportText += $"  Initial Step Size: {reportInitialStepSize}\n";

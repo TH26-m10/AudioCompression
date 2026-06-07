@@ -28,7 +28,7 @@ namespace AudioCompression
             public int OriginalBitRate { get; set; }
         }
 
-        private static readonly byte[] MagicBytes = new byte[] { 0x41, 0x44 }; // "AD"
+        private static readonly byte[] MagicBytes = new byte[] { 0x41, 0x44 };
 
         public AdaptiveDeltaModulation(CompressionSettings settings) : base(settings)
         {
@@ -46,7 +46,7 @@ namespace AudioCompression
 
             long originalSize = new FileInfo(inputFile).Length;
 
-            // حساب step size الأولي بناءً على RMS
+         
             float rms = (float)Math.Sqrt(samples.Average(s => s * s));
             float initialStep = Math.Max(_settings.MinStepSize, Math.Min(rms * 0.1f, _settings.MaxStepSize));
 
@@ -103,18 +103,18 @@ namespace AudioCompression
 
             float[] samples = Decode(encodedData, header.SampleCount, header.Channels, header);
 
-            // Always decode to WAV first with ORIGINAL bit depth
+         
             string tempWav = Path.Combine(
                 Path.GetDirectoryName(admFile),
                 Path.GetFileNameWithoutExtension(admFile) + "_decoded.wav");
 
             WriteWavFile(tempWav, samples, header.SampleRate, header.Channels, header.BitDepth);
 
-            // Then convert to original format if needed
+           
             string originalFormat = header.OriginalFormat ?? ".wav";
             string finalOutput = ConvertFromWav(tempWav, originalFormat, header.BitDepth, header.OriginalBitRate);
 
-            // Clean up temp WAV if we converted to something else
+     
             if (!finalOutput.Equals(tempWav, StringComparison.OrdinalIgnoreCase) && File.Exists(tempWav))
                 File.Delete(tempWav);
 
@@ -146,14 +146,14 @@ namespace AudioCompression
             }
         }
 
-        // ==================== CVSD ENCODE ====================
+ 
         private byte[] Encode(float[] samples, float initialStep, int channels, long originalFileSizeBytes)
         {
             int sampleCount = samples.Length;
             int byteCount = (sampleCount + 7) / 8;
             byte[] encoded = new byte[byteCount];
 
-            // متغيرات لكل قناة
+    
             float[] predicted = new float[channels];
             float[] stepSize = new float[channels];
             Queue<bool>[] bitHistory = new Queue<bool>[channels];
@@ -175,7 +175,6 @@ namespace AudioCompression
                 int channel = i % channels;
                 float currentSample = Math.Max(-1f, Math.Min(1f, samples[i]));
 
-                // CVSD: قرار الترميز
                 bool bit;
                 if (currentSample >= predicted[channel])
                 {
@@ -188,36 +187,33 @@ namespace AudioCompression
                     predicted[channel] -= stepSize[channel];
                 }
 
-                // تقييد التوقع ضمن [-1, 1]
+           
                 predicted[channel] = Math.Max(-1f, Math.Min(1f, predicted[channel]));
 
-                // تخزين البت
                 int byteIndex = i / 8;
                 int bitIndex = i % 8;
                 if (bit)
                     encoded[byteIndex] |= (byte)(1 << bitIndex);
 
-                // ==================== CVSD: تعديل الـ Step Size ====================
                 var history = bitHistory[channel];
                 history.Enqueue(bit);
                 if (history.Count > _settings.BitHistoryLength)
                     history.Dequeue();
 
-                // إذا كل البتات في التاريخ متشابهة → تضاعف الـ step
                 if (history.Count == _settings.BitHistoryLength && history.All(b => b == bit))
                 {
                     stepSize[channel] *= _settings.StepMultiplier;
                 }
                 else
                 {
-                    // تغيير في البت → صغر الـ step
+                 
                     stepSize[channel] *= _settings.StepDecay;
                 }
 
-                // تقييد الـ step size
+         
                 stepSize[channel] = Math.Max(_settings.MinStepSize, Math.Min(_settings.MaxStepSize, stepSize[channel]));
 
-                // ==================== Progress Reporting ====================
+               
                 if (i % reportInterval == 0 || i == sampleCount - 1)
                 {
                     float percentage = (float)(i + 1) / sampleCount;
@@ -241,12 +237,10 @@ namespace AudioCompression
             return encoded;
         }
 
-        // ==================== CVSD DECODE ====================
         private float[] Decode(byte[] encodedData, int sampleCount, int channels, ADMHeader header)
         {
             float[] samples = new float[sampleCount];
 
-            // متغيرات لكل قناة (يجب أن تتطابق مع الـ Encode)
             float[] predicted = new float[channels];
             float[] stepSize = new float[channels];
             Queue<bool>[] bitHistory = new Queue<bool>[channels];
@@ -267,7 +261,6 @@ namespace AudioCompression
                 if (byteIndex < encodedData.Length)
                     bit = ((encodedData[byteIndex] >> bitIndex) & 1) == 1;
 
-                // تطبيق البت
                 if (bit)
                     predicted[channel] += stepSize[channel];
                 else
@@ -276,7 +269,7 @@ namespace AudioCompression
                 predicted[channel] = Math.Max(-1f, Math.Min(1f, predicted[channel]));
                 samples[i] = predicted[channel];
 
-                // ==================== CVSD: إعادة حساب الـ Step Size (نفس الـ Encode) ====================
+           
                 var history = bitHistory[channel];
                 history.Enqueue(bit);
                 if (history.Count > header.BitHistoryLength)
@@ -297,7 +290,6 @@ namespace AudioCompression
             return samples;
         }
 
-        // ==================== HEADER ====================
         private void WriteHeader(BinaryWriter writer, ADMHeader header)
         {
             writer.Write(MagicBytes);
@@ -314,7 +306,7 @@ namespace AudioCompression
             writer.Write(header.BitHistoryLength);
             writer.Write(header.OriginalBitRate);
 
-            // Write format as fixed-length string (max 20 chars)
+      
             string format = (header.OriginalFormat ?? ".wav").PadRight(20).Substring(0, 20);
             writer.Write(format.ToCharArray());
         }
