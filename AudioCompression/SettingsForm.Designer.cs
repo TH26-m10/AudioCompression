@@ -1,5 +1,4 @@
-﻿
-namespace AudioCompression
+﻿namespace AudioCompression
 {
     partial class SettingsForm
     {
@@ -35,6 +34,17 @@ namespace AudioCompression
             this.cmbAlgorithm = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.panelSpecific = new System.Windows.Forms.Panel();
+            this.panelADM = new System.Windows.Forms.Panel();
+            this.numDecay = new System.Windows.Forms.NumericUpDown();
+            this.label10 = new System.Windows.Forms.Label();
+            this.numMultiplier = new System.Windows.Forms.NumericUpDown();
+            this.label9 = new System.Windows.Forms.Label();
+            this.numMaxStep = new System.Windows.Forms.NumericUpDown();
+            this.label8 = new System.Windows.Forms.Label();
+            this.numMinStep = new System.Windows.Forms.NumericUpDown();
+            this.label7 = new System.Windows.Forms.Label();
+            this.numBitHistory = new System.Windows.Forms.NumericUpDown();
+            this.label6 = new System.Windows.Forms.Label();
             this.panelDM = new System.Windows.Forms.Panel();
             this.numFixedStepSize = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
@@ -49,6 +59,12 @@ namespace AudioCompression
             this.groupBoxGlobal.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numTargetBitRate)).BeginInit();
             this.panelSpecific.SuspendLayout();
+            this.panelADM.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numDecay)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMultiplier)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxStep)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMinStep)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numBitHistory)).BeginInit();
             this.panelDM.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numFixedStepSize)).BeginInit();
             this.SuspendLayout();
@@ -125,6 +141,7 @@ namespace AudioCompression
             this.cmbAlgorithm.Name = "cmbAlgorithm";
             this.cmbAlgorithm.Size = new System.Drawing.Size(220, 24);
             this.cmbAlgorithm.TabIndex = 7;
+            this.cmbAlgorithm.SelectedIndexChanged += new System.EventHandler(this.cmbAlgorithm_SelectedIndexChanged);
             // 
             // label4
             // 
@@ -138,11 +155,210 @@ namespace AudioCompression
             // panelSpecific
             // 
             this.panelSpecific.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelSpecific.Controls.Add(this.panelADM);
             this.panelSpecific.Controls.Add(this.panelDM);
             this.panelSpecific.Location = new System.Drawing.Point(0, 167);
             this.panelSpecific.Name = "panelSpecific";
             this.panelSpecific.Size = new System.Drawing.Size(360, 150);
             this.panelSpecific.TabIndex = 1;
+            // 
+            // panelADM
+            // 
+            this.panelADM.Controls.Add(this.numDecay);
+            this.panelADM.Controls.Add(this.label10);
+            this.panelADM.Controls.Add(this.numMultiplier);
+            this.panelADM.Controls.Add(this.label9);
+            this.panelADM.Controls.Add(this.numMaxStep);
+            this.panelADM.Controls.Add(this.label8);
+            this.panelADM.Controls.Add(this.numMinStep);
+            this.panelADM.Controls.Add(this.label7);
+            this.panelADM.Controls.Add(this.numBitHistory);
+            this.panelADM.Controls.Add(this.label6);
+            this.panelADM.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelADM.Location = new System.Drawing.Point(0, 0);
+            this.panelADM.Name = "panelADM";
+            this.panelADM.Size = new System.Drawing.Size(358, 148);
+            this.panelADM.TabIndex = 1;
+            this.panelADM.Visible = false;
+            // 
+            // numDecay
+            // 
+            this.numDecay.DecimalPlaces = 2;
+            this.numDecay.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            this.numDecay.Location = new System.Drawing.Point(240, 85);
+            this.numDecay.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numDecay.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            262144});
+            this.numDecay.Name = "numDecay";
+            this.numDecay.Size = new System.Drawing.Size(100, 24);
+            this.numDecay.TabIndex = 9;
+            this.numDecay.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            65536});
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(180, 88);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(49, 17);
+            this.label10.TabIndex = 8;
+            this.label10.Text = "Decay:";
+            // 
+            // numMultiplier
+            // 
+            this.numMultiplier.DecimalPlaces = 2;
+            this.numMultiplier.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.numMultiplier.Location = new System.Drawing.Point(240, 55);
+            this.numMultiplier.Maximum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.numMultiplier.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numMultiplier.Name = "numMultiplier";
+            this.numMultiplier.Size = new System.Drawing.Size(100, 24);
+            this.numMultiplier.TabIndex = 7;
+            this.numMultiplier.Value = new decimal(new int[] {
+            15,
+            0,
+            0,
+            65536});
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(180, 58);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(67, 17);
+            this.label9.TabIndex = 6;
+            this.label9.Text = "Multiplier:";
+            // 
+            // numMaxStep
+            // 
+            this.numMaxStep.DecimalPlaces = 3;
+            this.numMaxStep.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.numMaxStep.Location = new System.Drawing.Point(240, 25);
+            this.numMaxStep.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numMaxStep.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.numMaxStep.Name = "numMaxStep";
+            this.numMaxStep.Size = new System.Drawing.Size(100, 24);
+            this.numMaxStep.TabIndex = 5;
+            this.numMaxStep.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            131072});
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(180, 28);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(69, 17);
+            this.label8.TabIndex = 4;
+            this.label8.Text = "Max Step:";
+            // 
+            // numMinStep
+            // 
+            this.numMinStep.DecimalPlaces = 4;
+            this.numMinStep.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            262144});
+            this.numMinStep.Location = new System.Drawing.Point(127, 55);
+            this.numMinStep.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numMinStep.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            393216});
+            this.numMinStep.Name = "numMinStep";
+            this.numMinStep.Size = new System.Drawing.Size(100, 24);
+            this.numMinStep.TabIndex = 3;
+            this.numMinStep.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            393216});
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 58);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(66, 17);
+            this.label7.TabIndex = 2;
+            this.label7.Text = "Min Step:";
+            // 
+            // numBitHistory
+            // 
+            this.numBitHistory.Location = new System.Drawing.Point(127, 25);
+            this.numBitHistory.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numBitHistory.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numBitHistory.Name = "numBitHistory";
+            this.numBitHistory.Size = new System.Drawing.Size(100, 24);
+            this.numBitHistory.TabIndex = 1;
+            this.numBitHistory.Value = new decimal(new int[] {
+            3,
+            0,
+            0,
+            0});
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 28);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(115, 17);
+            this.label6.TabIndex = 0;
+            this.label6.Text = "Bit History Length:";
             // 
             // panelDM
             // 
@@ -302,6 +518,13 @@ namespace AudioCompression
             this.groupBoxGlobal.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numTargetBitRate)).EndInit();
             this.panelSpecific.ResumeLayout(false);
+            this.panelADM.ResumeLayout(false);
+            this.panelADM.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numDecay)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMultiplier)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxStep)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMinStep)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numBitHistory)).EndInit();
             this.panelDM.ResumeLayout(false);
             this.panelDM.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numFixedStepSize)).EndInit();
@@ -328,5 +551,17 @@ namespace AudioCompression
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.NumericUpDown numTargetBitRate;
         private System.Windows.Forms.CheckBox chkTargetBitRate;
+
+        private System.Windows.Forms.Panel panelADM;
+        private System.Windows.Forms.NumericUpDown numBitHistory;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.NumericUpDown numMinStep;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.NumericUpDown numMaxStep;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.NumericUpDown numMultiplier;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.NumericUpDown numDecay;
+        private System.Windows.Forms.Label label10;
     }
 }

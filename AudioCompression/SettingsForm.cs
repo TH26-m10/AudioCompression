@@ -17,18 +17,21 @@ namespace AudioCompression
 
         private void LoadSettings()
         {
-            // إعدادات عامة
-            // sample rate
+            // ========== إعدادات عامة ==========
+
+            // Sample Rate
             if (Settings.SampleRate.HasValue)
                 cmbSampleRate.SelectedItem = Settings.SampleRate.Value.ToString();
             else
                 cmbSampleRate.SelectedItem = original;
-            // bit depth
+
+            // Bit Depth
             if (Settings.BitDepth.HasValue)
                 cmbBitDepth.SelectedItem = Settings.BitDepth.Value.ToString();
             else
                 cmbBitDepth.SelectedItem = original;
-            //channels
+
+            // Channels
             if (Settings.Channels.HasValue)
                 cmbChannels.SelectedItem = Settings.Channels.Value.ToString();
             else
@@ -46,30 +49,22 @@ namespace AudioCompression
                 numTargetBitRate.Enabled = false;
             }
 
-            // algorithm
+            // Algorithm
             cmbAlgorithm.SelectedItem = Settings.Algorithm.ToString();
 
-            // Nonlinear Quantization
-            //cmbCompandingLaw.SelectedItem = Settings.CompandingLaw.ToString();
-
-            // DPCM
-            //numPredictorOrder.Value = Settings.PredictorOrder;
-
-            // ADPCM
-            //numAdaptationSpeed.Value = (decimal)Settings.AdaptationSpeed;
-
-            // Delta Modulation
+            // ========== Delta Modulation ==========
             numFixedStepSize.Value = (decimal)Settings.FixedStepSize;
 
-            // Adaptive Delta Modulation
-            /*numBitHistory.Value = Settings.BitHistoryLength;
+            // ========== Adaptive Delta Modulation (CVSD) - جديد! ==========
+            numBitHistory.Value = Settings.BitHistoryLength;
             numMinStep.Value = (decimal)Settings.MinStepSize;
             numMaxStep.Value = (decimal)Settings.MaxStepSize;
             numMultiplier.Value = (decimal)Settings.StepMultiplier;
-            numDecay.Value = (decimal)Settings.StepDecay;*/
+            numDecay.Value = (decimal)Settings.StepDecay;
 
             UpdatePanelVisibility();
         }
+
         private void chkTargetBitRate_CheckedChanged(object sender, EventArgs e)
         {
             numTargetBitRate.Enabled = chkTargetBitRate.Checked;
@@ -82,11 +77,9 @@ namespace AudioCompression
 
         private void UpdatePanelVisibility()
         {
-            //panelNonlinearQuant.Visible = false;
-            //panelDPCM.Visible = false;
-            //panelADPCM.Visible = false;
+            // نخفي كل البانلات أولاً
             panelDM.Visible = false;
-            //panelADM.Visible = false;
+            panelADM.Visible = false;  // ← جديد!
 
             if (cmbAlgorithm.SelectedItem == null) return;
 
@@ -94,44 +87,37 @@ namespace AudioCompression
 
             switch (algo)
             {
-                //case "NonlinearQuantization": panelNonlinearQuant.Visible = true; break;
-                //case "DPCM": panelDPCM.Visible = true; break;
-                //case "PredictiveDifferentialCoding": panelADPCM.Visible = true; break;
-                case "DeltaModulation": panelDM.Visible = true; break;
-                //case "AdaptiveDeltaModulation": panelADM.Visible = true; break;
+                case "DeltaModulation":
+                    panelDM.Visible = true;
+                    break;
+
+                case "AdaptiveDeltaModulation":
+                    panelADM.Visible = true;  // ← جديد!
+                    break;
             }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            // إعدادات عامة
-            //sample rate
+            // ========== إعدادات عامة ==========
+
+            // Sample Rate
             if (cmbSampleRate.SelectedItem.ToString() == original)
-            {
                 Settings.SampleRate = null;
-            }
             else
-            {
                 Settings.SampleRate = int.Parse(cmbSampleRate.SelectedItem.ToString());
-            }
-            //bit depth
+
+            // Bit Depth
             if (cmbBitDepth.SelectedItem.ToString() == original)
-            {
                 Settings.BitDepth = null;
-            }
             else
-            {
                 Settings.BitDepth = int.Parse(cmbBitDepth.SelectedItem.ToString());
-            }
-            //channels
+
+            // Channels
             if (cmbChannels.SelectedItem.ToString() == original)
-            {
                 Settings.Channels = null;
-            }
             else
-            {
                 Settings.Channels = int.Parse(cmbChannels.SelectedItem.ToString());
-            }
 
             // Target Bit Rate
             if (chkTargetBitRate.Checked)
@@ -139,29 +125,19 @@ namespace AudioCompression
             else
                 Settings.TargetBitRate = null;
 
-
+            // Algorithm
             Settings.Algorithm = (CompressionAlgorithm)Enum.Parse(
                 typeof(CompressionAlgorithm), cmbAlgorithm.SelectedItem.ToString());
 
-            // Nonlinear Quantization
-           /* Settings.CompandingLaw = (CompandingLaw)Enum.Parse(
-                typeof(CompandingLaw), cmbCompandingLaw.SelectedItem.ToString());*/
-
-            // DPCM
-            //Settings.PredictorOrder = (int)numPredictorOrder.Value;
-
-            // ADPCM
-            //Settings.AdaptationSpeed = (double)numAdaptationSpeed.Value;
-
-            // Delta Modulation
+            // ========== Delta Modulation ==========
             Settings.FixedStepSize = (float)numFixedStepSize.Value;
 
-            // Adaptive Delta Modulation
-            /*Settings.BitHistoryLength = (int)numBitHistory.Value;
+            // ========== Adaptive Delta Modulation (CVSD) - جديد! ==========
+            Settings.BitHistoryLength = (int)numBitHistory.Value;
             Settings.MinStepSize = (float)numMinStep.Value;
             Settings.MaxStepSize = (float)numMaxStep.Value;
             Settings.StepMultiplier = (float)numMultiplier.Value;
-            Settings.StepDecay = (float)numDecay.Value;*/
+            Settings.StepDecay = (float)numDecay.Value;
 
             DialogResult = DialogResult.OK;
             Close();
