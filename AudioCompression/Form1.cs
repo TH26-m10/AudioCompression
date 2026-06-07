@@ -298,7 +298,7 @@ namespace AudioCompression
                         chartPerformance.Series["Speed"].Points.AddXY(
                             timeSeconds, progress.ProcessingSpeed / 1000.0);
                         chartPerformance.Series["Ratio"].Points.AddXY(
-                            timeSeconds, progress.CompressionRatio * 100.0);
+                            timeSeconds, progress.CompressionRatio * 100);
                     }));
                 };
 
@@ -307,8 +307,8 @@ namespace AudioCompression
                     _cancellationSource.Token);
 
                 sw.Stop();
-                progressBar.Value = 100;
-                lblProgress.Text = "100%";
+                //progressBar.Value = 100;
+                //lblProgress.Text = "100%";
 
                 GenerateReport(sw.ElapsedMilliseconds);
                 MessageBox.Show("Compression completed.\n\n" + compressedFilePath);
@@ -405,7 +405,7 @@ namespace AudioCompression
             }
         }
 
-        private void btnSaveDecompressed_Click(object sender, EventArgs e)
+        /*private void btnSaveDecompressed_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(decompressedFilePath))
             {
@@ -416,6 +416,60 @@ namespace AudioCompression
             using (var dialog = new SaveFileDialog())
             {
                 dialog.Filter = "Wave File (*.wav)|*.wav";
+                dialog.FileName = Path.GetFileName(decompressedFilePath);
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    File.Copy(decompressedFilePath, dialog.FileName, true);
+                    MessageBox.Show("Decompressed file saved.");
+                }
+            }
+        }*/
+        private void btnSaveDecompressed_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(decompressedFilePath))
+            {
+                MessageBox.Show("No decompressed file exists.");
+                return;
+            }
+
+            // Detect the actual format from the decompressed file
+            string ext = Path.GetExtension(decompressedFilePath).ToLowerInvariant();
+
+            // Build filter string based on actual format
+            string filter;
+            switch (ext)
+            {
+                case ".mp3":
+                    filter = "MP3 Audio (*.mp3)|*.mp3";
+                    break;
+                case ".aac":
+                    filter = "AAC Audio (*.aac)|*.aac";
+                    break;
+                case ".flac":
+                    filter = "FLAC Audio (*.flac)|*.flac";
+                    break;
+                case ".m4a":
+                    filter = "M4A Audio (*.m4a)|*.m4a";
+                    break;
+                case ".wma":
+                    filter = "WMA Audio (*.wma)|*.wma";
+                    break;
+                case ".aiff":
+                case ".aif":
+                    filter = "AIFF Audio (*.aiff)|*.aiff";
+                    break;
+                case ".wav":
+                    filter = "Wave File (*.wav)|*.wav";
+                    break;
+                default:
+                    filter = "All Files (*.*)|*.*";
+                    break;
+            }
+
+            using (var dialog = new SaveFileDialog())
+            {
+                dialog.Filter = filter;
                 dialog.FileName = Path.GetFileName(decompressedFilePath);
 
                 if (dialog.ShowDialog() == DialogResult.OK)

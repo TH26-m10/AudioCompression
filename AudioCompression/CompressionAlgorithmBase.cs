@@ -15,6 +15,7 @@ namespace AudioCompression
 
         protected CancellationToken CancellationToken { get; private set; }
 
+        // عملنا ايفينت اي كلاس بيقدر يشترك في 
         public event Action<CompressionProgress> ProgressChanged;
 
         protected CompressionAlgorithmBase(CompressionSettings settings)
@@ -22,6 +23,7 @@ namespace AudioCompression
             _settings = settings;
         }
 
+        // هاد التابع اللي بيستدعو الكلاسات ليتم تحديث الواجهة
         protected void ReportProgress(CompressionProgress progress)
         {
             ProgressChanged?.Invoke(progress);
@@ -169,8 +171,7 @@ namespace AudioCompression
 
         private static string FallbackToWav(string wavFile, string targetExtension)
         {
-            // Can't convert — return WAV and log why
-            Console.WriteLine($"Warning: {targetExtension} encoding not supported. Returning WAV.");
+            MessageBox.Show($"Warning: {targetExtension} encoding not supported. Returning WAV.");
             return wavFile;
         }
     }

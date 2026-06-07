@@ -158,7 +158,7 @@ namespace AudioCompression
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(12, 210);
+            this.label1.Location = new System.Drawing.Point(12, 205);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 17);
             this.label1.TabIndex = 5;
@@ -183,7 +183,7 @@ namespace AudioCompression
             this.tableLayoutPanel1.Controls.Add(this.label9, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.lblChannels, 1, 5);
             this.tableLayoutPanel1.Controls.Add(this.lblEncoding, 1, 6);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(16, 236);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(16, 226);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 6;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
@@ -346,7 +346,7 @@ namespace AudioCompression
             // 
             // btnSettings
             // 
-            this.btnSettings.Location = new System.Drawing.Point(346, 237);
+            this.btnSettings.Location = new System.Drawing.Point(346, 225);
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.Size = new System.Drawing.Size(510, 35);
             this.btnSettings.TabIndex = 7;
@@ -356,7 +356,7 @@ namespace AudioCompression
             // 
             // btnCompress
             // 
-            this.btnCompress.Location = new System.Drawing.Point(346, 278);
+            this.btnCompress.Location = new System.Drawing.Point(346, 266);
             this.btnCompress.Name = "btnCompress";
             this.btnCompress.Size = new System.Drawing.Size(254, 35);
             this.btnCompress.TabIndex = 8;
@@ -366,7 +366,7 @@ namespace AudioCompression
             // 
             // btnReset
             // 
-            this.btnReset.Location = new System.Drawing.Point(347, 442);
+            this.btnReset.Location = new System.Drawing.Point(347, 430);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(509, 35);
             this.btnReset.TabIndex = 9;
@@ -377,7 +377,7 @@ namespace AudioCompression
             // btnDecompress
             // 
             this.btnDecompress.Enabled = false;
-            this.btnDecompress.Location = new System.Drawing.Point(346, 319);
+            this.btnDecompress.Location = new System.Drawing.Point(346, 307);
             this.btnDecompress.Name = "btnDecompress";
             this.btnDecompress.Size = new System.Drawing.Size(253, 35);
             this.btnDecompress.TabIndex = 10;
@@ -388,7 +388,7 @@ namespace AudioCompression
             // btnSaveCompressed
             // 
             this.btnSaveCompressed.Enabled = false;
-            this.btnSaveCompressed.Location = new System.Drawing.Point(606, 278);
+            this.btnSaveCompressed.Location = new System.Drawing.Point(606, 266);
             this.btnSaveCompressed.Name = "btnSaveCompressed";
             this.btnSaveCompressed.Size = new System.Drawing.Size(250, 35);
             this.btnSaveCompressed.TabIndex = 11;
@@ -399,7 +399,7 @@ namespace AudioCompression
             // btnSaveDecompressed
             // 
             this.btnSaveDecompressed.Enabled = false;
-            this.btnSaveDecompressed.Location = new System.Drawing.Point(606, 319);
+            this.btnSaveDecompressed.Location = new System.Drawing.Point(606, 307);
             this.btnSaveDecompressed.Name = "btnSaveDecompressed";
             this.btnSaveDecompressed.Size = new System.Drawing.Size(250, 35);
             this.btnSaveDecompressed.TabIndex = 12;
@@ -410,7 +410,7 @@ namespace AudioCompression
             // btnShowReport
             // 
             this.btnShowReport.Enabled = false;
-            this.btnShowReport.Location = new System.Drawing.Point(347, 360);
+            this.btnShowReport.Location = new System.Drawing.Point(347, 348);
             this.btnShowReport.Name = "btnShowReport";
             this.btnShowReport.Size = new System.Drawing.Size(510, 35);
             this.btnShowReport.TabIndex = 13;
@@ -420,7 +420,7 @@ namespace AudioCompression
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(15, 490);
+            this.progressBar.Location = new System.Drawing.Point(15, 477);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(796, 23);
             this.progressBar.TabIndex = 14;
@@ -437,7 +437,7 @@ namespace AudioCompression
             this.chartPerformance.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.chartPerformance.Legends.Add(legend1);
-            this.chartPerformance.Location = new System.Drawing.Point(15, 524);
+            this.chartPerformance.Location = new System.Drawing.Point(15, 512);
             this.chartPerformance.Name = "chartPerformance";
             series1.BorderWidth = 2;
             series1.ChartArea = "ChartArea1";
@@ -454,14 +454,14 @@ namespace AudioCompression
             series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
             this.chartPerformance.Series.Add(series1);
             this.chartPerformance.Series.Add(series2);
-            this.chartPerformance.Size = new System.Drawing.Size(833, 161);
+            this.chartPerformance.Size = new System.Drawing.Size(833, 244);
             this.chartPerformance.TabIndex = 15;
             this.chartPerformance.Text = "chart1";
             // 
             // lblProgress
             // 
             this.lblProgress.AutoSize = true;
-            this.lblProgress.Location = new System.Drawing.Point(818, 492);
+            this.lblProgress.Location = new System.Drawing.Point(818, 481);
             this.lblProgress.Name = "lblProgress";
             this.lblProgress.Size = new System.Drawing.Size(30, 17);
             this.lblProgress.TabIndex = 16;
@@ -470,7 +470,7 @@ namespace AudioCompression
             // btnCancel
             // 
             this.btnCancel.Enabled = false;
-            this.btnCancel.Location = new System.Drawing.Point(347, 401);
+            this.btnCancel.Location = new System.Drawing.Point(347, 389);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(510, 35);
             this.btnCancel.TabIndex = 17;
@@ -482,7 +482,7 @@ namespace AudioCompression
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(869, 697);
+            this.ClientSize = new System.Drawing.Size(869, 748);
             this.Controls.Add(this.lblMessage);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.lblProgress);

@@ -1,6 +1,5 @@
 ﻿using NAudio.Wave;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -33,12 +32,14 @@ namespace AudioCompression
         {
             string outputFile = Path.ChangeExtension(inputFile, ".dm");
 
+            // عملنا معالجة مسبقة
             var processed = new AudioPreprocessor(_settings).Process(inputFile);
             float[] samples = processed.Samples;
 
             if (samples == null || samples.Length == 0)
                 throw new InvalidOperationException("Preprocessor returned no samples.");
 
+            //
             float rms = (float)Math.Sqrt(samples.Average(s => s * s));
             float stepSize = Math.Max(1e-6f, Math.Min(rms * 0.5f, 0.5f));
 
@@ -75,6 +76,7 @@ namespace AudioCompression
             if (!File.Exists(dmFile))
                 throw new FileNotFoundException($"DM file not found: {dmFile}");
 
+            // نقرأ معلومات الملف
             DMHeader header;
             byte[] encodedData;
             using (var fs = new FileStream(dmFile, FileMode.Open))
@@ -82,6 +84,7 @@ namespace AudioCompression
             {
                 header = ReadHeader(reader);
 
+                // الباقي هو عبارة عبارة عن باقي الملفبعد قراءة ال هيدر
                 long remaining = fs.Length - fs.Position;
                 if (remaining > int.MaxValue)
                     throw new InvalidOperationException("DM file too large to decompress in one pass.");
@@ -91,18 +94,18 @@ namespace AudioCompression
 
             float[] samples = Decode(encodedData, header.SampleCount, header.StepSize, header.Channels);
 
-            // Always decode to WAV first with ORIGINAL bit depth
+            // اول شي منحول لل wav بقيمة عمق البت الأصلية
             string tempWav = Path.Combine(
                 Path.GetDirectoryName(dmFile),
                 Path.GetFileNameWithoutExtension(dmFile) + "_decoded.wav");
 
+            // عم نبعت المتغيرات ال 3 هدول مشان بعض الصيغ بحاجتون ليشتغلو
             WriteWavFile(tempWav, samples, header.SampleRate, header.Channels, header.BitDepth);
 
-            // Then convert to original format if needed
             string originalFormat = header.OriginalFormat ?? ".wav";
             string finalOutput = ConvertFromWav(tempWav, originalFormat, header.BitDepth, header.OriginalBitRate);
 
-            // Clean up temp WAV if we converted to something else
+            // احذف ملف ال wav اللي تشكل إذا كنت حولت لصيغة تانية
             if (!finalOutput.Equals(tempWav, StringComparison.OrdinalIgnoreCase) && File.Exists(tempWav))
                 File.Delete(tempWav);
 
@@ -145,7 +148,9 @@ namespace AudioCompression
             float[] predicted = new float[channels];
 
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            // هي يعني تقريبا حيتم تحديث الواجهة 50 مرة
             int reportInterval = Math.Max(1, sampleCount / 50);
+            //int cancelInterval = Math.Max(1, sampleCount / 200);
 
             for (int i = 0; i < sampleCount; i++)
             {
@@ -173,6 +178,11 @@ namespace AudioCompression
                 {
                     int byteIndex = i / 8;
                     int bitIndex = i % 8;
+                    // عملية ال >> هي عملية شفت يسار لل 1 بمقدار قيمة المتغير
+                    // 1 => 0000_0001 => 1 << bitIndex(1) => 0000_0010 => 2
+                    // ونحول لبايت لأنو نتيجة الشفت هي int
+
+                    // عملية |= هي عملية "أو" مع مساواة هدفها تغير قيمة البت المحدد بدون ما تغير قيمة الباقي
                     encoded[byteIndex] |= (byte)(1 << bitIndex);
                 }
 
@@ -182,9 +192,10 @@ namespace AudioCompression
                     long elapsedMs = stopwatch.ElapsedMilliseconds;
                     float speed = elapsedMs > 0 ? (i + 1) / (elapsedMs / 1000f) : 0f;
                     float bytesProduced = (i + 1) / 8f;
-                    float ratio = originalFileSizeBytes > 0
-                        ? bytesProduced / originalFileSizeBytes
-                        : 0f;
+                    float ratio = originalFileSizeBytes > 0 ? bytesProduced / originalFileSizeBytes : 0f;
+                    /*originalFileSizeBytes > 0
+                    ? bytesProduced / originalFileSizeBytes
+                    : 0f;*/
 
                     ReportProgress(new CompressionProgress
                     {
@@ -207,11 +218,19 @@ namespace AudioCompression
             for (int i = 0; i < sampleCount; i++)
             {
                 int channel = i % channels;
-                int byteIndex = i / 8;
+                // أي بايت انا عندو هلا
+                int byteIndex = i / 8; 
+                // اي بت ضمن البايت انا عندو هلا
                 int bitIndex = i % 8;
 
                 bool bit = false;
+                // الشرط لاتأكد انو ما طلعت برا الفايل
                 if (byteIndex < encodedData.Length)
+                    // هلا عملية قراءة كل بت وشوف قيمتو بعمل شفت لليمين
+                    // 1011_0010 => >> bitIndex(1) => 0101_1001
+                    // بعدا ال & بتعمل ماسك لكل البتات عدا أقصى اليمين
+                    // 0101_1001 & 1 => 0000_0001
+                    // بعدا نقارن مع ال 1 ونشوف إذا القيمة الأساسية كانت 1 او 0
                     bit = ((encodedData[byteIndex] >> bitIndex) & 1) == 1;
 
                 if (bit)
@@ -219,6 +238,7 @@ namespace AudioCompression
                 else
                     predicted[channel] -= stepSize;
 
+                // نرجع للمجال من -1 لل 1
                 predicted[channel] = Math.Max(-1f, Math.Min(1f, predicted[channel]));
                 samples[i] = predicted[channel];
             }

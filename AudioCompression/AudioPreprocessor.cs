@@ -107,6 +107,7 @@ namespace AudioCompression
 
             switch (ext)
             {
+                case ".flac":
                 case ".wav":
                     using (var inspector = new WaveFileReader(filePath))
                         return inspector.WaveFormat.BitsPerSample;
@@ -115,10 +116,6 @@ namespace AudioCompression
                 case ".aiff":
                     using (var inspector = new AiffFileReader(filePath))
                         return inspector.WaveFormat.BitsPerSample;
-
-                /*case ".flac":
-                    using (var inspector = new FlacReader(filePath))
-                        return inspector.WaveFormat.BitsPerSample;*/
 
                 case ".mp3":
                 case ".aac":
@@ -135,19 +132,29 @@ namespace AudioCompression
 
         private float[] QuantizeBitDepth(float[] samples, int bitDepth)
         {
+            // نحسب عدد المستويات الممكنة لكل عينة
+            // هي العملية موازية لعملية حساب 2 للقوة عمق البت
             int levels = 1 << bitDepth;
             float[] output = new float[samples.Length];
 
             for (int i = 0; i < samples.Length; i++)
             {
+                // نحسب قيمة عشوائية نعتبرا الضوضاء حنضيفا لقيم الإشارة لأنها بتساعد تخفف من التشويه اللي بصير بعد التكميم
                 float dither = (float)(_rng.NextDouble() - _rng.NextDouble()) / levels;
 
+                // نحول القيمة من المجال [-1, 1] إلى [0, 1]
                 float normalized = (samples[i] + 1f) * 0.5f;
+
+                // نضيف الضوضاء ونحصر الناتج ضمن [0, 1]
                 normalized = Math.Max(0f, Math.Min(1f, normalized + dither));
 
+                // نكمّم القيمة إلى أقرب عدد صحيح ضمن المستويات المتاحة
                 int quantized = (int)Math.Round(normalized * (levels - 1));
+
+                // نرجع القيمة المكمّمة إلى المجال [0, 1]
                 float restored = (float)quantized / (levels - 1);
 
+                // نرجع القيمة إلى المجال الأصلي [-1, 1]
                 output[i] = restored * 2f - 1f;
             }
 
