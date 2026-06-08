@@ -35,7 +35,7 @@ namespace AudioCompression
         // public CompandingLaw CompandingLaw { get; set; } = CompandingLaw.MuLaw;
 
         // DPCM
-        public int? QuantizationLevels { get; set; } = 16;
+        public int? QuantizationLevels { get; set; } = 4;
 
 
         // ADPCM

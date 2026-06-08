@@ -166,10 +166,10 @@ namespace AudioCompression
 
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int reportInterval = Math.Max(1, sampleCount / 50);
-
+            int cancelInterval = Math.Max(1, sampleCount / 200);
             for (int i = 0; i < sampleCount; i++)
             {
-                if (i % reportInterval == 0)
+                if (i % cancelInterval == 0)
                     CancellationToken.ThrowIfCancellationRequested();
 
                 int channel = i % channels;
