@@ -34,9 +34,9 @@
             this.cmbAlgorithm = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.panelSpecific = new System.Windows.Forms.Panel();
-            this.panelDPCM = new System.Windows.Forms.Panel();  // ← جديد!
-            this.cmbQuantizationLevels = new System.Windows.Forms.ComboBox();  // ← جديد!
-            this.label11 = new System.Windows.Forms.Label();  // ← جديد!
+            this.panelDPCM = new System.Windows.Forms.Panel();
+            this.cmbQuantizationLevels = new System.Windows.Forms.ComboBox();
+            this.label11 = new System.Windows.Forms.Label();
             this.panelADM = new System.Windows.Forms.Panel();
             this.numDecay = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
@@ -62,7 +62,7 @@
             this.groupBoxGlobal.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numTargetBitRate)).BeginInit();
             this.panelSpecific.SuspendLayout();
-            this.panelDPCM.SuspendLayout();  // ← جديد!
+            this.panelDPCM.SuspendLayout();
             this.panelADM.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDecay)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMultiplier)).BeginInit();
@@ -136,9 +136,7 @@
             this.cmbAlgorithm.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbAlgorithm.FormattingEnabled = true;
             this.cmbAlgorithm.Items.AddRange(new object[] {
-            "NonlinearQuantization",
             "DPCM",
-            "PredictiveDifferentialCoding",
             "DeltaModulation",
             "AdaptiveDeltaModulation"});
             this.cmbAlgorithm.Location = new System.Drawing.Point(120, 103);
@@ -159,7 +157,7 @@
             // panelSpecific
             // 
             this.panelSpecific.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelSpecific.Controls.Add(this.panelDPCM);  // ← جديد! (لازم يكون أول وحدة)
+            this.panelSpecific.Controls.Add(this.panelDPCM);
             this.panelSpecific.Controls.Add(this.panelADM);
             this.panelSpecific.Controls.Add(this.panelDM);
             this.panelSpecific.Location = new System.Drawing.Point(0, 167);
@@ -167,7 +165,7 @@
             this.panelSpecific.Size = new System.Drawing.Size(360, 150);
             this.panelSpecific.TabIndex = 1;
             // 
-            // panelDPCM  // ← جديد! كامل
+            // panelDPCM
             // 
             this.panelDPCM.Controls.Add(this.cmbQuantizationLevels);
             this.panelDPCM.Controls.Add(this.label11);
@@ -176,7 +174,6 @@
             this.panelDPCM.Name = "panelDPCM";
             this.panelDPCM.Size = new System.Drawing.Size(358, 148);
             this.panelDPCM.TabIndex = 2;
-            this.panelDPCM.Visible = false;
             // 
             // cmbQuantizationLevels
             // 
@@ -200,7 +197,7 @@
             this.label11.AutoSize = true;
             this.label11.Location = new System.Drawing.Point(6, 28);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(138, 17);
+            this.label11.Size = new System.Drawing.Size(130, 17);
             this.label11.TabIndex = 0;
             this.label11.Text = "Quantization Levels:";
             // 
@@ -256,7 +253,7 @@
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(180, 88);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(49, 17);
+            this.label10.Size = new System.Drawing.Size(52, 17);
             this.label10.TabIndex = 8;
             this.label10.Text = "Decay:";
             // 
@@ -293,7 +290,7 @@
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(180, 58);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(67, 17);
+            this.label9.Size = new System.Drawing.Size(64, 17);
             this.label9.TabIndex = 6;
             this.label9.Text = "Multiplier:";
             // 
@@ -330,7 +327,7 @@
             this.label8.AutoSize = true;
             this.label8.Location = new System.Drawing.Point(180, 28);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(69, 17);
+            this.label8.Size = new System.Drawing.Size(70, 17);
             this.label8.TabIndex = 4;
             this.label8.Text = "Max Step:";
             // 
@@ -367,7 +364,7 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(6, 58);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(66, 17);
+            this.label7.Size = new System.Drawing.Size(65, 17);
             this.label7.TabIndex = 2;
             this.label7.Text = "Min Step:";
             // 
@@ -398,7 +395,7 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(6, 28);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(115, 17);
+            this.label6.Size = new System.Drawing.Size(122, 17);
             this.label6.TabIndex = 0;
             this.label6.Text = "Bit History Length:";
             // 
@@ -411,6 +408,7 @@
             this.panelDM.Name = "panelDM";
             this.panelDM.Size = new System.Drawing.Size(358, 148);
             this.panelDM.TabIndex = 0;
+            this.panelDM.Visible = false;
             // 
             // numFixedStepSize
             // 
@@ -560,8 +558,8 @@
             this.groupBoxGlobal.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numTargetBitRate)).EndInit();
             this.panelSpecific.ResumeLayout(false);
-            this.panelDPCM.ResumeLayout(false);  // ← جديد!
-            this.panelDPCM.PerformLayout();  // ← جديد!
+            this.panelDPCM.ResumeLayout(false);
+            this.panelDPCM.PerformLayout();
             this.panelADM.ResumeLayout(false);
             this.panelADM.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDecay)).EndInit();

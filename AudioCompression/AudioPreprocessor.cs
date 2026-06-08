@@ -107,7 +107,6 @@ namespace AudioCompression
 
             switch (ext)
             {
-                case ".flac":
                 case ".wav":
                     using (var inspector = new WaveFileReader(filePath))
                         return inspector.WaveFormat.BitsPerSample;
@@ -117,6 +116,7 @@ namespace AudioCompression
                     using (var inspector = new AiffFileReader(filePath))
                         return inspector.WaveFormat.BitsPerSample;
 
+                case ".flac":
                 case ".mp3":
                 case ".aac":
                 case ".m4a":

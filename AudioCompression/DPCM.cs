@@ -143,7 +143,10 @@ namespace AudioCompression
 
             WriteWavFile(outputFile, samples, header.SampleRate, header.Channels, header.BitDepth);
 
-            return outputFile;
+            string originalFormat = header.OriginalFormat ?? ".wav";
+            string finalOutput = ConvertFromWav(outputFile, originalFormat, header.BitDepth, header.OriginalBitRate);
+
+            return finalOutput;
         }
         private byte[] PackBits(byte[] data, int levels)
         {
