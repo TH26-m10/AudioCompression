@@ -17,12 +17,12 @@ namespace AudioCompression
             public int QuantizationLevels { get; set; }
             public float MinDifference { get; set; }
             public float MaxDifference { get; set; }
-            public float InitialSample { get; set; }
+            public float[] InitialSamples { get; set; }
             public string OriginalFormat { get; set; }
             public int OriginalBitRate { get; set; }
         }
 
-        private static readonly byte[] MagicBytes = new byte[] { 0x44, 0x50 }; 
+        private static readonly byte[] MagicBytes = new byte[] { 0x44, 0x50 };
 
         public DPCM(CompressionSettings settings) : base(settings) { }
 
@@ -34,36 +34,105 @@ namespace AudioCompression
             float[] samples = processed.Samples;
 
             if (samples == null || samples.Length == 0)
+            {
                 throw new InvalidOperationException("No samples found.");
+            }
 
+            int channels = processed.Channels;
             int quantizationLevels = _settings.QuantizationLevels ?? 4;
 
-            float[] differences = new float[samples.Length - 1];
-            for (int i = 1; i < samples.Length; i++)
+            // Separate channels (deinterleave)
+            float[][] channelSamples = new float[channels][];
+            int samplesPerChannel = samples.Length / channels;
+
+            for (int ch = 0; ch < channels; ch++)
             {
-                differences[i - 1] = samples[i] - samples[i - 1];
+                channelSamples[ch] = new float[samplesPerChannel];
+                for (int i = 0; i < samplesPerChannel; i++)
+                {
+                    channelSamples[ch][i] = samples[i * channels + ch];
+                }
             }
 
-            float minDiff = differences.Min();
-            float maxDiff = differences.Max();
+            // Compute differences per channel
+            float[][] channelDifferences = new float[channels][];
+            float[] minDiffs = new float[channels];
+            float[] maxDiffs = new float[channels];
+            float[] initialSamples = new float[channels];
 
-            
-            byte[] quantized = new byte[differences.Length];
-            for (int i = 0; i < differences.Length; i++)
+            for (int ch = 0; ch < channels; ch++)
             {
-                float normalized = (differences[i] - minDiff) / (maxDiff - minDiff);
-                normalized = Math.Max(0f, Math.Min(1f, normalized));
-                quantized[i] = (byte)(int)Math.Round(normalized * (quantizationLevels - 1));
+                float[] chSamples = channelSamples[ch];
+                initialSamples[ch] = chSamples[0];
+
+                channelDifferences[ch] = new float[chSamples.Length - 1];
+                for (int i = 1; i < chSamples.Length; i++)
+                {
+                    channelDifferences[ch][i - 1] = chSamples[i] - chSamples[i - 1];
+                }
+
+                minDiffs[ch] = channelDifferences[ch].Min();
+                maxDiffs[ch] = channelDifferences[ch].Max();
             }
 
+            // Quantize all differences
+            int totalDifferences = channelDifferences.Sum(d => d.Length);
+            byte[] allQuantized = new byte[totalDifferences];
+            int idx = 0;
 
-            byte[] packedData = PackBits(quantized, quantizationLevels);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            int reportInterval = Math.Max(1, totalDifferences / 50);
+            int cancelInterval = Math.Max(1, totalDifferences / 200);
+
+            for (int ch = 0; ch < channels; ch++)
+            {
+
+
+                float minDiff = minDiffs[ch];
+                float maxDiff = maxDiffs[ch];
+                float range = maxDiff - minDiff;
+
+                for (int i = 0; i < channelDifferences[ch].Length; i++)
+                {
+
+                    if (i % cancelInterval == 0)
+                        CancellationToken.ThrowIfCancellationRequested();
+
+                    float normalized = range > 0
+                        ? (channelDifferences[ch][i] - minDiff) / range
+                        : 0f;
+
+                    normalized = Math.Max(0f, Math.Min(1f, normalized));
+
+                    allQuantized[idx] = (byte)Math.Round(normalized * (quantizationLevels - 1));
+                    idx++;
+
+                    if (idx % reportInterval == 0 || idx == totalDifferences)
+                    {
+                        float percentage = (float)idx / totalDifferences;
+                        long elapsedMs = stopwatch.ElapsedMilliseconds;
+                        float speed = elapsedMs > 0 ? idx / (elapsedMs / 1000f) : 0f;
+
+                        ReportProgress(new CompressionProgress
+                        {
+                            Percentage = percentage,
+                            ProcessingSpeed = speed,
+                            CompressionRatio = percentage,
+                            ElapsedMs = elapsedMs
+                        });
+                    }
+                }
+            }
+
+            byte[] packedData = PackBits(allQuantized, quantizationLevels);
 
             int originalBitRate = 0;
             try
             {
-                var file = TagLib.File.Create(inputFile);
-                originalBitRate = file.Properties.AudioBitrate;
+                using (var file = TagLib.File.Create(inputFile))
+                {
+                    originalBitRate = file.Properties.AudioBitrate;
+                }
             }
             catch { }
 
@@ -71,12 +140,12 @@ namespace AudioCompression
             {
                 SampleRate = processed.SampleRate,
                 BitDepth = processed.BitDepth,
-                Channels = processed.Channels,
-                SampleCount = samples.Length,
+                Channels = channels,
+                SampleCount = samplesPerChannel,
                 QuantizationLevels = quantizationLevels,
-                MinDifference = minDiff,
-                MaxDifference = maxDiff,
-                InitialSample = samples[0],
+                MinDifference = minDiffs[0],
+                MaxDifference = maxDiffs[0],
+                InitialSamples = initialSamples,
                 OriginalFormat = Path.GetExtension(inputFile),
                 OriginalBitRate = originalBitRate
             };
@@ -90,14 +159,14 @@ namespace AudioCompression
 
             long originalSize = new FileInfo(inputFile).Length;
             long compressedSize = new FileInfo(outputFile).Length;
-            float ratio = (float)compressedSize / originalSize;
+            float finalRatio = (float)compressedSize / originalSize;
 
             ReportProgress(new CompressionProgress
             {
-                Percentage = 1.0f,
+                Percentage = 1f,
                 ProcessingSpeed = 0,
-                CompressionRatio = ratio,
-                ElapsedMs = 0
+                CompressionRatio = finalRatio,
+                ElapsedMs = stopwatch.ElapsedMilliseconds
             });
 
             return outputFile;
@@ -119,21 +188,43 @@ namespace AudioCompression
                 packedData = reader.ReadBytes((int)remainingBytes);
             }
 
-           
-            byte[] quantized = UnpackBits(packedData, header.QuantizationLevels, header.SampleCount - 1);
+            int totalDifferences = (header.SampleCount - 1) * header.Channels;
+            byte[] quantized = UnpackBits(packedData, header.QuantizationLevels, totalDifferences);
 
-            float[] differences = new float[quantized.Length];
-            for (int i = 0; i < quantized.Length; i++)
+            float[][] channelSamples = new float[header.Channels][];
+            int idx = 0;
+
+            for (int ch = 0; ch < header.Channels; ch++)
             {
-                float normalized = (float)quantized[i] / (header.QuantizationLevels - 1);
-                differences[i] = header.MinDifference + (normalized * (header.MaxDifference - header.MinDifference));
+                channelSamples[ch] = new float[header.SampleCount];
+                channelSamples[ch][0] = header.InitialSamples[ch];
+
+                float minDiff = header.MinDifference;
+                float maxDiff = header.MaxDifference;
+                float range = maxDiff - minDiff;
+
+                for (int i = 1; i < header.SampleCount; i++)
+                {
+                    float normalized = (float)quantized[idx] / (header.QuantizationLevels - 1);
+                    float diff = minDiff + (normalized * range);
+                    channelSamples[ch][i] = channelSamples[ch][i - 1] + diff;
+                    idx++;
+                }
             }
-           float[] samples = new float[header.SampleCount];
-            samples[0] = header.InitialSample;
 
-            for (int i = 1; i < header.SampleCount; i++)
+            // Interleave channels back
+            float[] samples = new float[header.SampleCount * header.Channels];
+            for (int i = 0; i < header.SampleCount; i++)
             {
-                samples[i] = samples[i - 1] + differences[i - 1];
+                for (int ch = 0; ch < header.Channels; ch++)
+                {
+                    samples[i * header.Channels + ch] = channelSamples[ch][i];
+                }
+            }
+
+            // Apply clipping only at final output
+            for (int i = 0; i < samples.Length; i++)
+            {
                 samples[i] = Math.Max(-1f, Math.Min(1f, samples[i]));
             }
 
@@ -148,6 +239,7 @@ namespace AudioCompression
 
             return finalOutput;
         }
+
         private byte[] PackBits(byte[] data, int levels)
         {
             int bitsPerValue = (int)Math.Ceiling(Math.Log(levels, 2));
@@ -155,20 +247,28 @@ namespace AudioCompression
             if (bitsPerValue >= 8)
                 return data;
 
-            int valuesPerByte = 8 / bitsPerValue;
             int mask = (1 << bitsPerValue) - 1;
-
-            int packedLength = (data.Length + valuesPerByte - 1) / valuesPerByte;
+            int packedLength = (data.Length * bitsPerValue + 7) / 8;
             byte[] packed = new byte[packedLength];
+
+            int bitPosition = 0;
 
             for (int i = 0; i < data.Length; i++)
             {
-                int byteIndex = i / valuesPerByte;
-                int bitOffset = (i % valuesPerByte) * bitsPerValue;
+                int byteIndex = bitPosition / 8;
+                int bitOffset = bitPosition % 8;
 
-         
-                int shift = 8 - bitsPerValue - bitOffset;
-                packed[byteIndex] |= (byte)((data[i] & mask) << shift);
+                int value = data[i] & mask;
+
+                packed[byteIndex] |= (byte)(value << bitOffset);
+
+                int overflowBits = bitOffset + bitsPerValue - 8;
+                if (overflowBits > 0 && byteIndex + 1 < packed.Length)
+                {
+                    packed[byteIndex + 1] |= (byte)(value >> (bitsPerValue - overflowBits));
+                }
+
+                bitPosition += bitsPerValue;
             }
 
             return packed;
@@ -181,18 +281,27 @@ namespace AudioCompression
             if (bitsPerValue >= 8)
                 return packed;
 
-            int valuesPerByte = 8 / bitsPerValue;
             int mask = (1 << bitsPerValue) - 1;
-
             byte[] unpacked = new byte[originalLength];
+
+            int bitPosition = 0;
 
             for (int i = 0; i < originalLength; i++)
             {
-                int byteIndex = i / valuesPerByte;
-                int bitOffset = (i % valuesPerByte) * bitsPerValue;
+                int byteIndex = bitPosition / 8;
+                int bitOffset = bitPosition % 8;
 
-                int shift = 8 - bitsPerValue - bitOffset;
-                unpacked[i] = (byte)((packed[byteIndex] >> shift) & mask);
+                int value = packed[byteIndex] >> bitOffset;
+
+                int bitsAvailable = 8 - bitOffset;
+                if (bitsAvailable < bitsPerValue && byteIndex + 1 < packed.Length)
+                {
+                    int bitsFromNext = bitsPerValue - bitsAvailable;
+                    value |= (packed[byteIndex + 1] & ((1 << bitsFromNext) - 1)) << bitsAvailable;
+                }
+
+                unpacked[i] = (byte)(value & mask);
+                bitPosition += bitsPerValue;
             }
 
             return unpacked;
@@ -208,7 +317,12 @@ namespace AudioCompression
             writer.Write(header.QuantizationLevels);
             writer.Write(header.MinDifference);
             writer.Write(header.MaxDifference);
-            writer.Write(header.InitialSample);
+
+            for (int i = 0; i < header.Channels; i++)
+            {
+                writer.Write(header.InitialSamples[i]);
+            }
+
             writer.Write(header.OriginalFormat);
             writer.Write(header.OriginalBitRate);
         }
@@ -219,7 +333,7 @@ namespace AudioCompression
             if (magic[0] != MagicBytes[0] || magic[1] != MagicBytes[1])
                 throw new InvalidDataException("Invalid DPCM file.");
 
-            return new DPCMHeader
+            var header = new DPCMHeader
             {
                 SampleRate = reader.ReadInt32(),
                 BitDepth = reader.ReadInt32(),
@@ -227,11 +341,19 @@ namespace AudioCompression
                 SampleCount = reader.ReadInt32(),
                 QuantizationLevels = reader.ReadInt32(),
                 MinDifference = reader.ReadSingle(),
-                MaxDifference = reader.ReadSingle(),
-                InitialSample = reader.ReadSingle(),
-                OriginalFormat = reader.ReadString(),
-                OriginalBitRate = reader.ReadInt32()
+                MaxDifference = reader.ReadSingle()
             };
+
+            header.InitialSamples = new float[header.Channels];
+            for (int i = 0; i < header.Channels; i++)
+            {
+                header.InitialSamples[i] = reader.ReadSingle();
+            }
+
+            header.OriginalFormat = reader.ReadString();
+            header.OriginalBitRate = reader.ReadInt32();
+
+            return header;
         }
     }
 }
