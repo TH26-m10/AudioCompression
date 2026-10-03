@@ -560,7 +560,7 @@ namespace AudioCompression
                 $"Compression Time: {elapsedMs} ms\n\n" +
                 $"Algorithm: {settings.Algorithm}\n" +
                 $"Sample Rate: {reportSampleRate} Hz\n" +
-                $"Encoded Bit Rate: {reportBitRate / 1000} kbps\n" +
+                //$"Encoded Bit Rate: {reportBitRate / 1000} kbps\n" +
                 $"Bit Depth: {reportBitDepth}\n" +
                 $"Channels: {reportChannels}\n";
 

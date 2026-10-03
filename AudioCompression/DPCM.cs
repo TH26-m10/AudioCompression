@@ -109,15 +109,18 @@ namespace AudioCompression
 
                     if (idx % reportInterval == 0 || idx == totalDifferences)
                     {
-                        float percentage = (float)idx / totalDifferences;
+                        long originalFileSizeBytes = new FileInfo(inputFile).Length;
+                        float percentage = (float)(idx + 1) / totalDifferences;
                         long elapsedMs = stopwatch.ElapsedMilliseconds;
-                        float speed = elapsedMs > 0 ? idx / (elapsedMs / 1000f) : 0f;
+                        float speed = elapsedMs > 0 ? (idx + 1) / (elapsedMs / 1000f) : 0f;
+                        float bytesProduced = (idx + 1) / 8f;
+                        float ratio = originalFileSizeBytes > 0 ? bytesProduced / originalFileSizeBytes : 0f;
 
                         ReportProgress(new CompressionProgress
                         {
                             Percentage = percentage,
                             ProcessingSpeed = speed,
-                            CompressionRatio = percentage,
+                            CompressionRatio = ratio,
                             ElapsedMs = elapsedMs
                         });
                     }
